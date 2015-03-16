@@ -19,13 +19,16 @@ xformed_data$Flight_trans_12_Log <- log(EastWestAirlinesCluster$Flight_trans_12+
 xformed_data <- scale(xformed_data, center=TRUE, scale=TRUE)
 #xformed_data$Days_since_enroll <- xformed_data$Days_since_enroll
 
-# **try for a few values of k **
-kmeans_fit <- kmeans(xformed_data, centers=4)
-rsq <- kmeans_fit$betweenss / kmeans_fit$totss
-# and adjusted rsq...
+# returns rsq value for k-means clustering w/ k=k
+get_rsq <- function(k) {
+  kmeans_fit <- kmeans(xformed_data, centers=k)
+  rsq <- kmeans_fit$betweenss / kmeans_fit$totss
+  return(rsq)
+}
 
-xformed_data <- data.frame(xformed_data, "cluster"=kmeans_fit$cluster)
+# try for a few different values of k
+k_vals <- c(2,3,4,5,6,7,8,9)
+rsq_vals <- lapply(k_vals, get_rsq)
 
-centers_df <- data.frame(kmeans_fit$centers)
-
-plot(xformed_data[c("Bonus_miles_Log", "Flight_trans_12_Log")], col=xformed_data$cluster)
+# plot rsq vs k
+plot(k_vals, rsq_vals, xlab="k", ylab="R-squared", main="K-means Performance by # of Clusters", col="blue")
